@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A simple search page to find information on the web.">
+    <title>Discover The Web</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, violet, lightpink, pink);
+            background-size: 300% 300%;
+            animation: wave 10s ease infinite;
+        }
+
+        @keyframes wave {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .search-container {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin-right: 10px;
+            border: 2px solid #007BFF;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #007BFF;
+            background-color: #e0f7fa;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0px rgba(0, 123, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+            }
+            100% {
+                box-shadow: 0 0 0px rgba(0, 123, 255, 0.5);
+            }
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #ff6f91;
+            color: white;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ff4b6e;
+        }
+    </style>
+</head>
+
+<body>
+<h1>Search Engine</h1>
+<div class="search-container">
+    <form id="searchForm">
+        <input type="text" name="q" id="searchInput" placeholder="Type your search query here..." required>
+        <button type="submit">Search</button>
+        <button type="button" id="clearButton">Clear</button>
+    </form>
+    <div id="searchEnergy"></div>
+</div>
+
+<script>
+    const MAX_SEARCHES = 12; // Safely limited
+    const COOLDOWN_TIME = 60 * 60 * 1000; // 1 hour reset
+
+    function getRemainingSearches() {
+        let storedData = JSON.parse(localStorage.getItem("searchData"));
+        if (!storedData || Date.now() - storedData.timestamp >= COOLDOWN_TIME) {
+            localStorage.removeItem("searchData"); // Force reset
+            localStorage.setItem("searchData", JSON.stringify({ count: MAX_SEARCHES, timestamp: Date.now() }));
+            return MAX_SEARCHES;
+        }
+        return storedData.count;
+    }
+
+    function updateSearches() {
+        let storedData = JSON.parse(localStorage.getItem("searchData"));
+        if (storedData.count > 0) {
+            storedData.count--;
+            localStorage.setItem("searchData", JSON.stringify(storedData));
+            document.getElementById("searchEnergy").innerHTML = `🔋 Searches Left: <strong>${storedData.count}</strong>`;
+            return true;
+        }
+        return false;
+    }
+
+    document.getElementById('searchForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!updateSearches()) {
+            alert("You've reached your search limit. Please come back after an hour.");
+            return;
+        }
+        const query = document.getElementById('searchInput').value;
+        window.location.href = `https://www.google.com/search?q=${query}`;
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        let remainingSearches = getRemainingSearches();
+        document.getElementById("searchEnergy").innerHTML = `🔋 Searches Left: <strong>${remainingSearches}</strong>`;
+    });
+
+    document.getElementById('clearButton').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+    });
+</script>
+</body>
+
+</html>
